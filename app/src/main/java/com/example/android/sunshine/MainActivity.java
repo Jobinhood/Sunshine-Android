@@ -8,7 +8,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Log.d("CREATION","Tapped Settings Button");
             return true;
         }
 
@@ -57,7 +64,38 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
+
+            String[] forecastArray = new String[]{
+                    "Today - Sunny - 88/63",
+                    "Tomorrow - Foggy - 70/40",
+                    "Weds - Cloudy - 72/63",
+                    "Thurs - Asteroids - 75/65",
+                    "Fri - Heavy Rain - 65/56",
+                    "Sat - Nothing - 60/51",
+                    "Sun - Sunny - 80/68",
+                    "Sun1 - Sunny - 80/68",
+                    "Sun2 - Sunny - 80/68",
+                    "Sun3 - Sunny - 80/68",
+                    "Sun4 - Sunny - 80/68"
+            };
+
+            List<String> weekForecast = new ArrayList<String>(
+                    Arrays.asList(forecastArray)
+            );
+
+            ArrayAdapter<String> mForecastAdapter = new ArrayAdapter<String>(
+                    getActivity(), // Current context
+                    R.layout.list_item_forecast, // ID of list item layout
+                    R.id.list_item_forecast_textview, // Id of textview to populate
+                    weekForecast // Forecast Data
+            );
+
             View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
+            // Get a reference to the ListView, and attach this adapter to it.
+            ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
+            listView.setAdapter(mForecastAdapter);
+
             return rootView;
         }
     }
