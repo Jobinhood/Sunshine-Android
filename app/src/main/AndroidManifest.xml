@@ -41,8 +41,13 @@
         </activity>
 
         <provider
+            android:name=".data.WeatherProvider"
             android:authorities="com.example.android.sunshine"
-            android:name=".data.WeatherProvider" />
+            android:enable="true"
+            android:exported="false" />
+        <!-- Set android:exported to true to share Content Provider with other apps
+        They will only need URI to access the provider -->
+
 
     </application>
 
