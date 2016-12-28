@@ -90,8 +90,6 @@ public class ForecastFragment extends Fragment {
             }
         });
 
-
-
         return rootView;
     }
 
