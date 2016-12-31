@@ -37,6 +37,9 @@ public class MainActivity extends AppCompatActivity implements ForecastFragment.
             }
         } else {
             mTwoPane = false;
+            // Get rid of an unnecessary shadow below the action bar for smaller screen devices
+            // like phones
+            getSupportActionBar().setElevation(0f);
         }
 
         ForecastFragment forecastFragment =  ((ForecastFragment)getSupportFragmentManager()
