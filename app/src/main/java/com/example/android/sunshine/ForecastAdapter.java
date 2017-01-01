@@ -48,8 +48,6 @@ public class ForecastAdapter extends CursorAdapter {
         }
     }
 
-
-
     public ForecastAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
     }
