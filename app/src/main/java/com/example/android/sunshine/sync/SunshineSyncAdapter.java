@@ -48,6 +48,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Vector;
 
+import static java.net.HttpURLConnection.HTTP_BAD_GATEWAY;
+
 public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     public final String LOG_TAG = SunshineSyncAdapter.class.getSimpleName();
     // Interval at which to sync with the weather, in seconds.
@@ -72,15 +74,14 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final int INDEX_SHORT_DESC = 3;
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({LOCATION_STATUS_OK, LOCATION_STATUS_SERVER_DOWN, LOCATION_STATUS_SERVER_INVALID,  LOCATION_STATUS_UNKNOWN})
+    @IntDef({LOCATION_STATUS_OK, LOCATION_STATUS_SERVER_DOWN, LOCATION_STATUS_SERVER_INVALID,  LOCATION_STATUS_UNKNOWN, LOCATION_STATUS_INVALID})
     public @interface LocationStatus {}
 
     public static final int LOCATION_STATUS_OK = 0;
     public static final int LOCATION_STATUS_SERVER_DOWN = 1;
-    public static final int
-            LOCATION_STATUS_SERVER_INVALID = 2;
-    public static final int
-            LOCATION_STATUS_UNKNOWN = 3;
+    public static final int LOCATION_STATUS_SERVER_INVALID = 2;
+    public static final int LOCATION_STATUS_UNKNOWN = 3;
+    public static final int LOCATION_STATUS_INVALID = 4;
 
     public SunshineSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
@@ -105,6 +106,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         int numDays = 14;
 
         try {
+            Log.d(LOG_TAG, "AR onPerformSync()");
             // Construct the URL for the OpenWeatherMap query
             // Possible parameters are avaiable at OWM's forecast API page, at
             // http://openweathermap.org/API#forecast
@@ -149,6 +151,7 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             }
 
             if (buffer.length() == 0) {
+                Log.d(LOG_TAG, "AR - buffer.length() == 0");
                 // Stream was empty.  No point in parsing.
                 setLocationStatus(getContext(), LOCATION_STATUS_SERVER_DOWN);
                 return;
@@ -156,11 +159,13 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
             forecastJsonStr = buffer.toString();
             getWeatherDataFromJson(forecastJsonStr, locationQuery);
         } catch (IOException e) {
+            Log.d(LOG_TAG, "AR - IOException e");
             Log.e(LOG_TAG, "Error ", e);
             // If the code didn't successfully get the weather data, there's no point in attempting
             // to parse it.
             setLocationStatus(getContext(), LOCATION_STATUS_SERVER_DOWN);
         } catch (JSONException e) {
+            Log.d(LOG_TAG, "AR - JSONEXception e");
             Log.e(LOG_TAG, e.getMessage(), e);
             e.printStackTrace();
             setLocationStatus(getContext(), LOCATION_STATUS_SERVER_INVALID);
@@ -222,8 +227,37 @@ public class SunshineSyncAdapter extends AbstractThreadedSyncAdapter {
         final String OWM_DESCRIPTION = "main";
         final String OWM_WEATHER_ID = "id";
 
+        final String OWM_MESSAGE_CODE = "cod";
+        Log.d(LOG_TAG, "AR getWeatherDataFromJson()");
         try {
             JSONObject forecastJson = new JSONObject(forecastJsonStr);
+
+            // do we have an error?
+            if ( forecastJson.has(OWM_MESSAGE_CODE) ) {
+                int errorCode = forecastJson.getInt(OWM_MESSAGE_CODE);
+                Log.d(LOG_TAG, "AR THIS IS THE ERROR: " + errorCode);
+
+                switch (errorCode) {
+                    case HttpURLConnection.HTTP_OK:
+                        Log.d(LOG_TAG, "AR THE ERROR IS HTTP_OK");
+                        break;
+                    // 404
+                    case HttpURLConnection.HTTP_NOT_FOUND:
+                        Log.d(LOG_TAG, "AR THE ERROR IS HTTP_NOT_FOUND");
+                        setLocationStatus(getContext(), LOCATION_STATUS_INVALID);
+                        return;
+                    // 502
+                    case HTTP_BAD_GATEWAY:
+                        Log.d(LOG_TAG, "AR THE ERROR IS HTTP_BAD_GATEWAY");
+                        setLocationStatus(getContext(), LOCATION_STATUS_INVALID);
+                        return;
+                    default:
+                        Log.d(LOG_TAG, "AR THE ERROR IS DEFAULT");
+                        setLocationStatus(getContext(), LOCATION_STATUS_SERVER_DOWN);
+                        return;
+                }
+            }
+
             JSONArray weatherArray = forecastJson.getJSONArray(OWM_LIST);
 
             JSONObject cityJson = forecastJson.getJSONObject(OWM_CITY);
