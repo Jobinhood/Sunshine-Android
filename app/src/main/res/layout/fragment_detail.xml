@@ -30,7 +30,8 @@
         android:paddingLeft="@dimen/forecast_detail_horizontal_padding"
         android:paddingStart="@dimen/forecast_detail_horizontal_padding"
         android:paddingRight="@dimen/forecast_detail_horizontal_padding"
-        android:paddingEnd="@dimen/forecast_detail_horizontal_padding">
+        android:paddingEnd="@dimen/forecast_detail_horizontal_padding"
+        android:elevation="4dp">
 
         <TextView
             android:id="@+id/detail_humidity_label_textview"
@@ -90,4 +91,13 @@
             app:layout_gravity="fill" />
     </android.support.v7.widget.GridLayout>
 
+    <!-- empty view -->
+    <LinearLayout
+        android:id="@+id/emptyView"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:orientation="horizontal">
+    </LinearLayout>
+
 </LinearLayout>
+
