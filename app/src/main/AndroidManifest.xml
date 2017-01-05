@@ -12,6 +12,9 @@
         android:protectionLevel="signature" />
     <uses-permission android:name="com.example.android.sunshine.permission.C2D_MESSAGE" />
 
+    <!-- Permissions required to use the Place Picker -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <!-- Permissions required by the sync adapter -->
     <uses-permission
         android:name="android.permission.READ_SYNC_SETTINGS"/>
